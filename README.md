@@ -16,7 +16,7 @@ We use [`rn-fetch-blob`](https://github.com/joltup/rn-fetch-blob) to handle file
 
 _You should only have to do this once._
 
-    react-native link react-native-fetch-blob
+    react-native link rn-fetch-blob
 
 ## Note
 
