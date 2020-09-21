@@ -17,23 +17,23 @@ const {
   ImageBackground,
   ActivityIndicator,
   Platform,
-  StyleSheet
+  StyleSheet,
 } = ReactNative;
 
 const NetInfo = require("@react-native-community/netinfo");
 
 const styles = StyleSheet.create({
   image: {
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   loader: {
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   loaderPlaceholder: {
     backgroundColor: "transparent",
     alignItems: "center",
-    justifyContent: "center"
-  }
+    justifyContent: "center",
+  },
 });
 
 function getImageProps(props) {
@@ -46,11 +46,11 @@ function getImageProps(props) {
     "style",
     "useQueryParamsInCacheKey",
     "renderImage",
-    "resolveHeaders"
+    "resolveHeaders",
   ]);
 }
 
-const CACHED_IMAGE_REF = "cachedImage";
+const CACHED_IMAGE_REF = React.createRef();
 
 class CachedImage extends React.Component {
   static propTypes = {
@@ -58,22 +58,22 @@ class CachedImage extends React.Component {
     activityIndicatorProps: PropTypes.object.isRequired,
 
     // ImageCacheManager options
-    ...ImageCacheManagerOptionsPropTypes
+    ...ImageCacheManagerOptionsPropTypes,
   };
 
   static defaultProps = {
-    renderImage: props => (
+    renderImage: (props) => (
       <ImageBackground
         imageStyle={props.style}
         ref={CACHED_IMAGE_REF}
         {...props}
       />
     ),
-    activityIndicatorProps: {}
+    activityIndicatorProps: {},
   };
 
   static contextTypes = {
-    getImageCacheManager: PropTypes.func
+    getImageCacheManager: PropTypes.func,
   };
 
   constructor(props) {
@@ -82,7 +82,7 @@ class CachedImage extends React.Component {
     this.state = {
       isCacheable: true,
       cachedImagePath: null,
-      networkAvailable: true
+      networkAvailable: true,
     };
 
     this.getImageCacheManagerOptions = this.getImageCacheManagerOptions.bind(
@@ -95,16 +95,13 @@ class CachedImage extends React.Component {
     this.renderLoader = this.renderLoader.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this._isMounted = true;
-    NetInfo.isConnected.addEventListener(
-      "connectionChange",
-      this.handleConnectivityChange
-    );
+    NetInfo.addEventListener("connectionChange", this.handleConnectivityChange);
     // initial
-    NetInfo.isConnected.fetch().then(isConnected => {
+    NetInfo.fetch().then((isConnected) => {
       this.safeSetState({
-        networkAvailable: isConnected
+        networkAvailable: isConnected,
       });
     });
 
@@ -113,13 +110,13 @@ class CachedImage extends React.Component {
 
   componentWillUnmount() {
     this._isMounted = false;
-    NetInfo.isConnected.removeEventListener(
+    NetInfo.removeEventListener(
       "connectionChange",
       this.handleConnectivityChange
     );
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (!_.isEqual(this.props.source, nextProps.source)) {
       this.processSource(nextProps.source);
     }
@@ -156,7 +153,7 @@ class CachedImage extends React.Component {
 
   handleConnectivityChange(isConnected) {
     this.safeSetState({
-      networkAvailable: isConnected
+      networkAvailable: isConnected,
     });
   }
 
@@ -167,16 +164,16 @@ class CachedImage extends React.Component {
 
     imageCacheManager
       .downloadAndCacheUrl(url, options)
-      .then(cachedImagePath => {
+      .then((cachedImagePath) => {
         this.safeSetState({
-          cachedImagePath
+          cachedImagePath,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         // console.warn(err);
         this.safeSetState({
           cachedImagePath: null,
-          isCacheable: false
+          isCacheable: false,
         });
       });
   }
@@ -190,7 +187,7 @@ class CachedImage extends React.Component {
     const source =
       this.state.isCacheable && this.state.cachedImagePath
         ? {
-            uri: "file://" + this.state.cachedImagePath
+            uri: "file://" + this.state.cachedImagePath,
           }
         : this.props.source;
     if (this.props.fallbackSource && !this.state.cachedImagePath) {
@@ -198,14 +195,14 @@ class CachedImage extends React.Component {
         ...props,
         key: `${props.key || source.uri}error`,
         style,
-        source: this.props.fallbackSource
+        source: this.props.fallbackSource,
       });
     }
     return this.props.renderImage({
       ...props,
       key: props.key || source.uri,
       style,
-      source
+      source,
     });
   }
 
@@ -214,7 +211,7 @@ class CachedImage extends React.Component {
     const imageStyle = [this.props.style, styles.loaderPlaceholder];
 
     const activityIndicatorProps = _.omit(this.props.activityIndicatorProps, [
-      "style"
+      "style",
     ]);
     const activityIndicatorStyle =
       this.props.activityIndicatorProps.style || styles.loader;
@@ -258,7 +255,7 @@ class CachedImage extends React.Component {
           {...activityIndicatorProps}
           style={activityIndicatorStyle}
         />
-      )
+      ),
     });
   }
 }
