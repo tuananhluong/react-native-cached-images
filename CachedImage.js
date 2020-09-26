@@ -109,10 +109,7 @@ class CachedImage extends React.Component {
 
   componentWillUnmount() {
     if (this._isMounted) {
-      NetInfo.removeEventListener(
-        "connectionChange",
-        this.handleConnectivityChange
-      );
+      this._isMounted();
       this._isMounted = false;
     }
   }
