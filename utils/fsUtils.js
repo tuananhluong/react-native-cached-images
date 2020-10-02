@@ -2,7 +2,7 @@
 
 const _ = require("lodash");
 
-const RNFetchBlob = require("rn-fetch-blob").default;
+const RNFetchBlob = require("rn-fetch-blob");
 
 const { fs } = RNFetchBlob;
 
@@ -23,7 +23,7 @@ function ensurePath(path) {
   const dirPath = getDirPath(path);
   return fs
     .isDir(dirPath)
-    .then(isDir => {
+    .then((isDir) => {
       if (!isDir) {
         return (
           fs
@@ -31,7 +31,7 @@ function ensurePath(path) {
             // check if dir has indeed been created because
             // there's no exception on incorrect user-defined paths (?)...
             .then(() => fs.isDir(dirPath))
-            .then(isDir => {
+            .then((isDir) => {
               if (!isDir) {
                 throw new Error("Invalid cacheLocation");
               }
@@ -39,7 +39,7 @@ function ensurePath(path) {
         );
       }
     })
-    .catch(err => {
+    .catch((err) => {
       // ignore folder already exists errors
       if (err.message.includes("folder already exists")) {
         return;
@@ -51,18 +51,18 @@ function ensurePath(path) {
 function collectFilesInfo(basePath) {
   return fs
     .stat(basePath)
-    .then(info => {
+    .then((info) => {
       if (info.type === "file") {
         return [info];
       }
-      return fs.ls(basePath).then(files => {
-        const promises = _.map(files, file => {
+      return fs.ls(basePath).then((files) => {
+        const promises = _.map(files, (file) => {
           return collectFilesInfo(`${basePath}/${file}`);
         });
         return Promise.all(promises);
       });
     })
-    .catch(err => {
+    .catch((err) => {
       return [];
     });
 }
@@ -97,10 +97,10 @@ module.exports = {
       // create an active download for this file
       activeDownloads[toFile] = ensurePath(toFile).then(() =>
         RNFetchBlob.config({
-          path: tmpFile
+          path: tmpFile,
         })
           .fetch("GET", fromUrl, headers)
-          .then(res => {
+          .then((res) => {
             if (res.respInfo.status === 304) {
               return Promise.resolve(toFile);
             }
@@ -110,7 +110,7 @@ module.exports = {
               return Promise.reject();
             }
 
-            return RNFetchBlob.fs.stat(tmpFile).then(fileStats => {
+            return RNFetchBlob.fs.stat(tmpFile).then((fileStats) => {
               // Verify if the content was fully downloaded!
               if (
                 res.respInfo.headers["Content-Length"] &&
@@ -123,7 +123,7 @@ module.exports = {
               return fs.mv(tmpFile, toFile);
             });
           })
-          .catch(error => {
+          .catch((error) => {
             // cleanup. will try re-download on next CachedImage mount.
             this.deleteFile(tmpFile);
             delete activeDownloads[toFile];
@@ -149,9 +149,9 @@ module.exports = {
   deleteFile(filePath) {
     return fs
       .stat(filePath)
-      .then(res => res && res.type === "file")
-      .then(exists => exists && fs.unlink(filePath))
-      .catch(err => {
+      .then((res) => res && res.type === "file")
+      .then((exists) => exists && fs.unlink(filePath))
+      .catch((err) => {
         // swallow error to always resolve
       });
   },
@@ -174,7 +174,7 @@ module.exports = {
   cleanDir(dirPath) {
     return fs
       .isDir(dirPath)
-      .then(isDir => isDir && fs.unlink(dirPath))
+      .then((isDir) => isDir && fs.unlink(dirPath))
       .catch(() => {})
       .then(() => ensurePath(dirPath));
   },
@@ -187,24 +187,24 @@ module.exports = {
   getDirInfo(dirPath) {
     return fs
       .isDir(dirPath)
-      .then(isDir => {
+      .then((isDir) => {
         if (isDir) {
           return collectFilesInfo(dirPath);
         } else {
           throw new Error("Dir does not exists");
         }
       })
-      .then(filesInfo => {
+      .then((filesInfo) => {
         const files = _.flattenDeep(filesInfo);
         const size = _.sumBy(files, "size");
         return {
           files,
-          size
+          size,
         };
       });
   },
 
   exists(path) {
     return fs.exists(path);
-  }
+  },
 };
