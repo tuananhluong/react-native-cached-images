@@ -52,7 +52,7 @@
     "prop-types": "15.7.2",
     "react-native-clcasher": "1.0.0",
     "rn-fetch-blob": "0.10.16",
-    "url-parse": "1.4.7"
+    "url-parse": "1.5.8"
   },
   "devDependencies": {
     "babel-jest": "^21.0.2",
